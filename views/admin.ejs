@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Product</title>
+</head>
+<body>
+
+<h2>Add / Update Product</h2>
+
+<form action="<%= editrecord ? '/update/' + editrecord._id : '/create' %>" 
+      method="POST" enctype="multipart/form-data">
+    
+    <!-- Hidden ID for edit -->
+    <% if(editrecord){ %>
+      <input type="hidden" name="id" value="<%= editrecord._id %>">
+    <% } %>
+
+    <!-- Name -->
+    Name:
+    <input type="text" name="name" value="<%= editrecord ? editrecord.name : '' %>" required><br><br>
+
+    <!-- Price -->
+    Price:
+    <input type="number" name="price" value="<%= editrecord ? editrecord.price : '' %>" required><br><br>
+
+    <!-- Profile Image -->
+    Profile:
+    <input type="file" name="profile" <%= editrecord ? '' : 'required' %>><br>
+    <% if(editrecord){ %>
+      <img src="/uploads/<%= editrecord.profile %>" width="60" alt="Profile Image">
+    <% } %>
+    <br><br>
+
+    <!-- Submit Button -->
+    <button type="submit"><%= editrecord ? 'Update' : 'Add Product' %></button>
+</form>
+
+<hr>
+
+<h2>Product List</h2>
+
+<table border="1">
+  <tr>
+    <th>Name</th>
+    <th>Price</th>
+    <th>Profile</th>
+    <th>Edit</th>
+  </tr>
+
+  <% data.forEach(product => { %>
+    <tr>
+      <td><%= product.name %></td>
+      <td><%= product.price %></td>
+      <td>
+        <img src="/uploads/<%= product.profile %>" width="60" alt="Product Image">
+      </td>
+      <td>
+        <a href="/edit/<%= product._id %>">
+          <button>Edit</button>
+        </a>
+      </td>
+    </tr>
+  <% }) %>
+</table>
+
+</body>
+</html>
