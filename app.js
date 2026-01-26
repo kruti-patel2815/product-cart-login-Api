@@ -1,61 +1,93 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
 
-var userRouter = require('./routes/userRoutes');
-var cartRouter = require('./routes/cartRoutes');
-var productRouter = require('./routes/product');
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+require('dotenv').config();
 
-var app = express();
-
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const cors = require('cors');
 const mongoose = require('mongoose');
 
-// ✅ MongoDB connection (SAFE)
-mongoose.connect('mongodb://127.0.0.1:27017/user')
-.then(() => {
-    console.log('MongoDB connected');
-    
-    // ✅ Test Product model
-    const Product = require('./model/Product');
-    console.log('✅ Product model loaded:', Product);
-})
-.catch(err => console.error('MongoDB error:', err));
 
-// view engine setup
+const indexRouter = require('./routes/index');
+const usersRouter = require('./routes/users');
+const userRouter = require('./routes/userRoutes');
+const cartRouter = require('./routes/cartRoutes');
+const productRouter = require('./routes/product');
+
+const app = express();
+
+
+const MONGODB_URI =
+  process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/user';
+
+mongoose
+  .connect(MONGODB_URI)
+  .then(() => {
+    console.log('✅ MongoDB connected successfully');
+  })
+  .catch((err) => {
+    console.error('❌ MongoDB connection error:', err.message);
+  });
+
+
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-// middlewares
+
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(cors());
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// routes
+
 app.use('/', indexRouter);
-app.use('/api/users',userRouter);
-app.use('/cart', cartRouter);
-app.use('/product', productRouter);
 app.use('/users', usersRouter);
 
-// catch 404
-app.use(function(req, res, next) {
+
+app.use('/api/user', userRouter);
+app.use('/api/cart', cartRouter);
+app.use('/api/product', productRouter);
+
+
+app.get('/api/status', (req, res) => {
+  res.json({
+    status: '✅ API is running',
+    timestamp: new Date().toISOString(),
+    database:
+      mongoose.connection.readyState === 1
+        ? 'Connected'
+        : 'Disconnected',
+  });
+});
+
+
+app.use((req, res, next) => {
   next(createError(404));
 });
 
-// error handler
-app.use(function(err, req, res, next) {
+
+app.use((err, req, res, next) => {
+  
+  if (req.originalUrl.startsWith('/api')) {
+    return res.status(err.status || 500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+
+ 
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
   res.status(err.status || 500);
   res.render('error');
 });
+
 
 module.exports = app;
