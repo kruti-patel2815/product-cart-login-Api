@@ -4,7 +4,6 @@ const multer = require('multer');
 const path = require('path');
 const productController = require('../controller/productController');
 
-// Multer setup
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, path.join(__dirname, '../uploads'));
@@ -16,7 +15,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Routes
+
 router.get('/', productController.pageview);
 router.post('/create', upload.single('profile'), productController.create);
 router.patch('/update/:id', upload.single('profile'), productController.update);

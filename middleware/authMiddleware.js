@@ -2,51 +2,50 @@ const jwt = require('jsonwebtoken');
 
 const authMiddleware = (req, res, next) => {
     try {
-        // Get token from header
-        const authHeader = req.header('Authorization');
-
-        if (!authHeader) {
-            return res.status(401).json({
-                success: false,
-                message: 'No authorization header'
-            });
+       
+        let token;
+        
+        if (req.cookies?.token) {
+            token = req.cookies.token;
+        } else if (req.headers.authorization) {
+            token = req.headers.authorization.replace('Bearer ', '');
         }
-
-        // Check Bearer format
-        if (!authHeader.startsWith('Bearer ')) {
-            return res.status(401).json({
-                success: false,
-                message: 'Invalid token format'
-            });
-        }
-
-        // Extract token
-        const token = authHeader.replace('Bearer ', '');
 
         if (!token) {
+           
+            if (req.method === 'POST' && req.originalUrl.includes('/cart')) {
+                return res.redirect('/login?error=Please login first');
+            }
             return res.status(401).json({
                 success: false,
                 message: 'No token provided'
             });
         }
 
-        // Verify token with fallback secret
+        
         const decoded = jwt.verify(
             token,
             process.env.JWT_SECRET || 'fallback_secret_key'
         );
 
-        // ✅ Add user to request
+        
         req.user = {
-            userId: decoded.id,  // ✅ id ઉપરથી userId મૂકો
+            userId: decoded.id,  
+            id: decoded.id,      
             email: decoded.email
         };
 
-        console.log('✅ Authenticated user:', req.user);
+        console.log('Authenticated user ID:', req.user.userId);
         next();
 
     } catch (err) {
         console.error('Auth error:', err);
+        
+        
+        if (req.method === 'POST' && req.originalUrl.includes('/cart')) {
+            return res.redirect('/login?error=Session expired, please login again');
+        }
+        
         res.status(401).json({
             success: false,
             message: 'Invalid or expired token'

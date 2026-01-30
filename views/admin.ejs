@@ -1,67 +1,93 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Admin Product</title>
+  <title>Admin - Product Management</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    img { border-radius: 5px; }
+    form { margin-bottom: 30px; padding: 20px; border: 1px solid #ddd; background: #f9f9f9; }
+    input { padding: 8px; margin: 5px; }
+    button { padding: 10px 20px; background: #4CAF50; color: white; border: none; cursor: pointer; }
+    button:hover { background: #45a049; }
+  </style>
 </head>
 <body>
 
-<h2>Add / Update Product</h2>
+<h1>Product</h1>
+
+<h2><%= editrecord ? 'Edit Product' : 'Add New Product' %></h2>
 
 <form action="<%= editrecord ? '/update/' + editrecord._id : '/create' %>" 
       method="POST" enctype="multipart/form-data">
-    
-    <!-- Hidden ID for edit -->
-    <% if(editrecord){ %>
-      <input type="hidden" name="id" value="<%= editrecord._id %>">
+  
+  <% if(editrecord){ %>
+    <input type="hidden" name="id" value="<%= editrecord._id %>">
+  <% } %>
+
+  <div>
+    Name:<input type="text" name="name" value="<%= editrecord ? editrecord.name : '' %>" required>
+  </div>
+
+  <div>
+    Price:<input type="number" name="price" value="<%= editrecord ? editrecord.price : '' %>" required>
+  </div>
+
+  <div>
+    Product Image:<input type="file" name="profile" <%= editrecord ? '' : 'required' %>>
+    <% if(editrecord && editrecord.profile){ %>
+      <br>
+      <img src="/uploads/<%= editrecord.profile %>" width="100" alt="Current Image">
+      <p>Current: <%= editrecord.profile %></p>
     <% } %>
+  </div>
 
-    <!-- Name -->
-    Name:
-    <input type="text" name="name" value="<%= editrecord ? editrecord.name : '' %>" required><br><br>
-
-    <!-- Price -->
-    Price:
-    <input type="number" name="price" value="<%= editrecord ? editrecord.price : '' %>" required><br><br>
-
-    <!-- Profile Image -->
-    Profile:
-    <input type="file" name="profile" <%= editrecord ? '' : 'required' %>><br>
-    <% if(editrecord){ %>
-      <img src="/uploads/<%= editrecord.profile %>" width="60" alt="Profile Image">
-    <% } %>
-    <br><br>
-
-    <!-- Submit Button -->
-    <button type="submit"><%= editrecord ? 'Update' : 'Add Product' %></button>
+  <br>
+  <button type="submit"><%= editrecord ? 'Update Product' : 'Add Product' %></button>
+  <% if(editrecord){ %>
+    <a href="/admin/products" style="margin-left: 10px;">Cancel</a>
+  <% } %>
 </form>
 
 <hr>
 
 <h2>Product List</h2>
 
-<table border="1">
-  <tr>
-    <th>Name</th>
-    <th>Price</th>
-    <th>Profile</th>
-    <th>Edit</th>
-  </tr>
-
-  <% data.forEach(product => { %>
+<% if(data.length === 0){ %>
+  <p>No products found. Add your first product!</p>
+<% } else { %>
+  <table>
     <tr>
-      <td><%= product.name %></td>
-      <td><%= product.price %></td>
-      <td>
-        <img src="/uploads/<%= product.profile %>" width="60" alt="Product Image">
-      </td>
-      <td>
-        <a href="/edit/<%= product._id %>">
-          <button>Edit</button>
-        </a>
-      </td>
+      <th>Image</th>
+      <th>Name</th>
+      <th>Price</th>
+      <th>Actions</th>
     </tr>
-  <% }) %>
-</table>
+
+    <% data.forEach(product => { %>
+      <tr>
+        <td>
+          <% if(product.profile){ %>
+            <img src="/uploads/<%= product.profile %>" width="60" alt="Product Image">
+          <% } else { %>
+            No Image
+          <% } %>
+        </td>
+        <td><%= product.name %></td>
+        <td>₹<%= product.price %></td>
+        <td>
+          <a href="/edit/<%= product._id %>">
+            <button style="background: #2196F3;">Edit</button>
+          </a>
+        </td>
+      </tr>
+    <% }) %>
+  </table>
+<% } %>
+
+
 
 </body>
 </html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Products</title>
+</head>
+
+<body>
+    <h1>Products</h1>
+
+    <p>
+        <a href="/">Home</a> |
+        <a href="/cart">View Cart</a> |
+        <a href="/logout">Logout</a>
+    </p>
+
+    <hr>
+
+    <% products.forEach(product=> { %>
+        <div style="border:1px solid #ccc; padding:10px; margin:10px;">
+            <% if(product.profile){ %>
+                <img src="/uploads/<%= product.profile %>" width="100">
+                <% } %>
+                    <h3>
+                        <%= product.name %>
+                    </h3>
+                    <p>Price: ₹<%= product.price %>
+                    </p>
+
+
+                    <form action="/api/cart/add" method="POST">
+                        <input type="hidden" name="productId" value="<%= product._id %>">
+                        <button type="submit">Add to Cart</button>
+                    </form>
+        </div>
+        <% }) %>
+</body>
+
+</html>
