@@ -21,8 +21,8 @@ const app = express();
 
 mongoose
   .connect(process.env.MONGODB_URI)
-  .then(() => console.log('✅ MongoDB Connected'))
-  .catch(err => console.error('❌ MongoDB Error:', err.message));
+  .then(() => console.log('MongoDB Connected'))
+  .catch(err => console.error('MongoDB Error:', err.message));
 
 
 app.set('views', path.join(__dirname, 'views'));
